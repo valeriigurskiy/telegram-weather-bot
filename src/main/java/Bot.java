@@ -1,54 +1,29 @@
-
 import org.json.JSONObject;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.vdurmont.emoji.EmojiParser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.nio.Buffer;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
 
-
-//        if (update.hasMessage()) {
-//            if (update.getMessage().hasText()) {
-//                if (update.getMessage().getText().equals("Hello")) {
-//                    try {
-//                        execute(sendInlineKeyBoardMessage(update.getMessage().getChatId()));
-//                    } catch (TelegramApiException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        } else if (update.hasCallbackQuery()) {
-//            try {
-//                execute(new SendMessage().setText(
-//                        update.getCallbackQuery().getData())
-//                        .setChatId(update.getCallbackQuery().getMessage().getChatId()));
-//            } catch (TelegramApiException e) {
-//                e.printStackTrace();
-//            }
-//        }
         resultMethod(update);
+
     }
 
+
     public void resultMethod(Update update) {
+
+
         String cityResult = null;
         String countryResult = null;
         int temperatureNowResult = 0;
@@ -140,32 +115,37 @@ public class Bot extends TelegramLongPollingBot {
 
         try {
             boolean equalsStart = message.getText().equals("/start");
+            boolean equalsMyCities = message.getText().equals("/mycities");
+            boolean equalsGetWeather = message.getText().equals("Get weather");
             if (message.hasText() && equalsStart) {
-                sendMessage(message, "Hello! Welcome to weather bot\n" + "To start write the city name");
+                sendMessage(message, "Hello! Welcome to weather bot\n" + "Write \"Get weather\" to get weather");
+//                sendMessage(message, "Hello! Welcome to weather bot\n" + "To start write the city name");
             }
-            if (message.hasText()) {
-                assert connection != null;
-                if (HttpURLConnection.HTTP_OK == connection.getResponseCode() && !equalsStart) {
-                    assert countryResult != null;
-                    String country_emoji = EmojiParser.parseToUnicode(":" + countryResult.toLowerCase() + ":");
-                    sendMessage(message, "\uD83C\uDF06City: " + cityResult + "\n"
-                            + country_emoji + "Country: " + countryResult + "\n"
-                            + "\uD83C\uDF21Temperature: " + temperatureNowResult + "\n"
-                            + "\uD83C\uDF21Temperature feels like: " + feelsLikeTemperatureResult + "\n"
-                            + "⬆\uD83C\uDF21Maximum temperature today: " + maximumTemperatureResult + "\n"
-                            + "⬇\uD83C\uDF21Minimal temperature today: " + minimumTemperatureResult + "\n"
-                            + "☀Sunrise: " + sunriseTimeResult + "\n"
-                            + "\uD83C\uDF11Sunset: " + sunsetTimeResult + "\n"
-                            + "\uD83D\uDCA8Wind speed: " + windSpeedResult + " meter/sec" + "\n"
-                            + "\uD83D\uDCA6Humidity: " + humidityResult + "%" + "\n");
-                }
+
+            if (equalsGetWeather) {
+                sendMessage(message, "Write your city");
             }
-            if (message.hasText()) {
-                assert connection != null;
-                if (HttpURLConnection.HTTP_OK != connection.getResponseCode() && !equalsStart) {
-                    sendMessage(message, "City named " + message.getText() + " does not exist");
-                }
+
+            assert connection != null;
+            if(HttpURLConnection.HTTP_OK != connection.getResponseCode() && !equalsGetWeather && !equalsStart){
+                sendMessage(message, "Command or city named \"" + message.getText() + "\" does not exist");
             }
+
+            if (HttpURLConnection.HTTP_OK == connection.getResponseCode() && !equalsStart && !equalsMyCities && !equalsGetWeather) {
+                assert countryResult != null;
+                String country_emoji = EmojiParser.parseToUnicode(":" + countryResult.toLowerCase() + ":");
+                sendMessage(message, "\uD83C\uDF06City: " + cityResult + "\n"
+                        + country_emoji + "Country: " + countryResult + "\n"
+                        + "\uD83C\uDF21Temperature: " + temperatureNowResult + "\n"
+                        + "\uD83C\uDF21Temperature feels like: " + feelsLikeTemperatureResult + "\n"
+                        + "⬆\uD83C\uDF21Maximum temperature today: " + maximumTemperatureResult + "\n"
+                        + "⬇\uD83C\uDF21Minimal temperature today: " + minimumTemperatureResult + "\n"
+                        + "☀Sunrise: " + sunriseTimeResult + "\n"
+                        + "\uD83C\uDF11Sunset: " + sunsetTimeResult + "\n"
+                        + "\uD83D\uDCA8Wind speed: " + windSpeedResult + " meter/sec" + "\n"
+                        + "\uD83D\uDCA6Humidity: " + humidityResult + "%" + "\n");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
